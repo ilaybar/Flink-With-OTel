@@ -1,0 +1,60 @@
+services:
+  tempo:
+    image: grafana/tempo:latest
+    command: [-config.file=/etc/tempo.yaml]
+    ports:
+      - "4317:4317"       # OTLP gRPC (traces)
+      - "4318:4318"       # OTLP HTTP (traces)
+      - "3200:3200"       # Temeto HTTP query API
+    volumes:
+      - tempo-data:/var/tempo
+      - ./tempo.yaml:/etc/tempo.yaml
+    networks:
+      - observability
+
+  loki:
+    image: grafana/loki:latest
+    command: -config.file=/etc/loki/loki.yaml
+    ports:
+      - "3100:3100"
+    volumes:
+      - loki-data:/loki
+      - ./loki.yaml:/etc/loki/loki.yaml
+    networks:
+      - observability
+
+  promtail:
+    image: grafana/promtail:latest
+    command: -config.file=/etc/promtail/promtail.yaml
+    volumes:
+      - ./promtail.yaml:/etc/promtail/promtail.yaml
+      - ../flink-otel-demo:/var/log/app:ro
+    networks:
+      - observability
+    depends_on:
+      - loki
+
+  grafana:
+    image: grafana/grafana:latest
+    ports:
+      - "3000:3000"
+    environment:
+      - GF_AUTH_ANONYMOUS_ENABLED=true
+      - GF_AUTH_ANONYMOUS_ORG_ROLE=Admin
+    volumes:
+      - ./grafana/datasources:/etc/grafana/provisioning/datasources
+      - ./grafana/dashboards:/etc/grafana/provisioning/dashboards
+      - grafana-data:/var/lib/grafana
+    networks:
+      - observability
+    depends_on:
+      - tempo
+      - loki
+
+volumes:
+  tempo-data:
+  loki-data:
+  grafana-data:
+
+networks:
+  observability:
