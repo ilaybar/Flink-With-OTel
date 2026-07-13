@@ -1,0 +1,249 @@
+{
+  "annotations": { "list": [] },
+  "description": "Unified JVM runtime dashboard for all JVM services (plain Java, Spring, Flink JM/TMs) instrumented with the OpenTelemetry Java agent (-Dotel.metrics.exporter=prometheus, scrape port 9464). Metric names follow OTel JVM semantic conventions.",
+  "editable": true,
+  "fiscalYearStartMonth": 0,
+  "graphTooltip": 1,
+  "id": null,
+  "links": [],
+  "panels": [
+    {
+      "type": "stat",
+      "title": "Pods up",
+      "datasource": { "type": "prometheus", "uid": "${datasource}" },
+      "gridPos": { "h": 4, "w": 6, "x": 0, "y": 0 },
+      "id": 1,
+      "fieldConfig": { "defaults": { "color": { "mode": "thresholds" }, "unit": "short", "thresholds": { "mode": "absolute", "steps": [ { "color": "red", "value": null }, { "color": "green", "value": 1 } ] } }, "overrides": [] },
+      "options": { "reduceOptions": { "calcs": ["lastNotNull"] }, "colorMode": "value", "graphMode": "none" },
+      "targets": [ { "refId": "A", "expr": "count(up{job=~\"$job\", pod=~\"$pod\"} == 1)", "legendFormat": "up" } ]
+    },
+    {
+      "type": "stat",
+      "title": "Total heap used",
+      "datasource": { "type": "prometheus", "uid": "${datasource}" },
+      "gridPos": { "h": 4, "w": 6, "x": 6, "y": 0 },
+      "id": 2,
+      "fieldConfig": { "defaults": { "color": { "mode": "fixed", "fixedColor": "blue" }, "unit": "bytes" }, "overrides": [] },
+      "options": { "reduceOptions": { "calcs": ["lastNotNull"] }, "colorMode": "value", "graphMode": "area" },
+      "targets": [ { "refId": "A", "expr": "sum(jvm_memory_used_bytes{jvm_memory_type=\"heap\", job=~\"$job\", pod=~\"$pod\"})", "legendFormat": "heap" } ]
+    },
+    {
+      "type": "stat",
+      "title": "Avg process CPU",
+      "datasource": { "type": "prometheus", "uid": "${datasource}" },
+      "gridPos": { "h": 4, "w": 6, "x": 12, "y": 0 },
+      "id": 3,
+      "fieldConfig": { "defaults": { "color": { "mode": "thresholds" }, "unit": "percentunit", "thresholds": { "mode": "absolute", "steps": [ { "color": "green", "value": null }, { "color": "yellow", "value": 0.7 }, { "color": "red", "value": 0.9 } ] } }, "overrides": [] },
+      "options": { "reduceOptions": { "calcs": ["lastNotNull"] }, "colorMode": "value", "graphMode": "area" },
+      "targets": [ { "refId": "A", "expr": "avg(jvm_cpu_recent_utilization_ratio{job=~\"$job\", pod=~\"$pod\"})", "legendFormat": "cpu" } ]
+    },
+    {
+      "type": "stat",
+      "title": "Total threads",
+      "datasource": { "type": "prometheus", "uid": "${datasource}" },
+      "gridPos": { "h": 4, "w": 6, "x": 18, "y": 0 },
+      "id": 4,
+      "fieldConfig": { "defaults": { "color": { "mode": "fixed", "fixedColor": "purple" }, "unit": "short" }, "overrides": [] },
+      "options": { "reduceOptions": { "calcs": ["lastNotNull"] }, "colorMode": "value", "graphMode": "area" },
+      "targets": [ { "refId": "A", "expr": "sum(jvm_thread_count{job=~\"$job\", pod=~\"$pod\"})", "legendFormat": "threads" } ]
+    },
+    {
+      "type": "row",
+      "title": "Memory",
+      "gridPos": { "h": 1, "w": 24, "x": 0, "y": 4 },
+      "id": 100,
+      "collapsed": false,
+      "panels": []
+    },
+    {
+      "type": "timeseries",
+      "title": "Heap used by pod",
+      "datasource": { "type": "prometheus", "uid": "${datasource}" },
+      "gridPos": { "h": 8, "w": 12, "x": 0, "y": 5 },
+      "id": 5,
+      "fieldConfig": { "defaults": { "color": { "mode": "palette-classic" }, "unit": "bytes", "custom": { "lineWidth": 2, "fillOpacity": 8, "showPoints": "never", "drawStyle": "line", "spanNulls": true } }, "overrides": [] },
+      "options": { "legend": { "displayMode": "list", "placement": "bottom", "showLegend": true }, "tooltip": { "mode": "multi", "sort": "desc" } },
+      "targets": [ { "refId": "A", "expr": "sum by (pod) (jvm_memory_used_bytes{jvm_memory_type=\"heap\", job=~\"$job\", pod=~\"$pod\"})", "legendFormat": "{{pod}}" } ]
+    },
+    {
+      "type": "timeseries",
+      "title": "Heap utilization (used / limit)",
+      "datasource": { "type": "prometheus", "uid": "${datasource}" },
+      "gridPos": { "h": 8, "w": 12, "x": 12, "y": 5 },
+      "id": 6,
+      "fieldConfig": { "defaults": { "color": { "mode": "palette-classic" }, "unit": "percentunit", "max": 1, "custom": { "lineWidth": 2, "fillOpacity": 8, "showPoints": "never", "drawStyle": "line", "spanNulls": true } }, "overrides": [] },
+      "options": { "legend": { "displayMode": "list", "placement": "bottom", "showLegend": true }, "tooltip": { "mode": "multi", "sort": "desc" } },
+      "targets": [ { "refId": "A", "expr": "sum by (pod) (jvm_memory_used_bytes{jvm_memory_type=\"heap\", job=~\"$job\", pod=~\"$pod\"}) / sum by (pod) (jvm_memory_limit_bytes{jvm_memory_type=\"heap\", job=~\"$job\", pod=~\"$pod\"})", "legendFormat": "{{pod}}" } ]
+    },
+    {
+      "type": "timeseries",
+      "title": "Memory used by pool",
+      "datasource": { "type": "prometheus", "uid": "${datasource}" },
+      "gridPos": { "h": 8, "w": 12, "x": 0, "y": 13 },
+      "id": 7,
+      "fieldConfig": { "defaults": { "color": { "mode": "palette-classic" }, "unit": "bytes", "custom": { "lineWidth": 2, "fillOpacity": 8, "showPoints": "never", "drawStyle": "line", "spanNulls": true } }, "overrides": [] },
+      "options": { "legend": { "displayMode": "list", "placement": "bottom", "showLegend": true }, "tooltip": { "mode": "multi", "sort": "desc" } },
+      "targets": [ { "refId": "A", "expr": "sum by (jvm_memory_pool_name, jvm_memory_type) (jvm_memory_used_bytes{job=~\"$job\", pod=~\"$pod\"})", "legendFormat": "{{jvm_memory_pool_name}} ({{jvm_memory_type}})" } ]
+    },
+    {
+      "type": "timeseries",
+      "title": "Heap used after last GC (retained set)",
+      "datasource": { "type": "prometheus", "uid": "${datasource}" },
+      "gridPos": { "h": 8, "w": 12, "x": 12, "y": 13 },
+      "id": 8,
+      "fieldConfig": { "defaults": { "color": { "mode": "palette-classic" }, "unit": "bytes", "custom": { "lineWidth": 2, "fillOpacity": 8, "showPoints": "never", "drawStyle": "line", "spanNulls": true } }, "overrides": [] },
+      "options": { "legend": { "displayMode": "list", "placement": "bottom", "showLegend": true }, "tooltip": { "mode": "multi", "sort": "desc" } },
+      "targets": [ { "refId": "A", "expr": "sum by (jvm_memory_pool_name) (jvm_memory_used_after_last_gc_bytes{job=~\"$job\", pod=~\"$pod\"})", "legendFormat": "{{jvm_memory_pool_name}}" } ]
+    },
+    {
+      "type": "row",
+      "title": "Garbage collection",
+      "gridPos": { "h": 1, "w": 24, "x": 0, "y": 21 },
+      "id": 101,
+      "collapsed": false,
+      "panels": []
+    },
+    {
+      "type": "timeseries",
+      "title": "GC pause p95",
+      "datasource": { "type": "prometheus", "uid": "${datasource}" },
+      "gridPos": { "h": 8, "w": 12, "x": 0, "y": 22 },
+      "id": 9,
+      "fieldConfig": { "defaults": { "color": { "mode": "palette-classic" }, "unit": "s", "custom": { "lineWidth": 2, "fillOpacity": 8, "showPoints": "never", "drawStyle": "line", "spanNulls": true } }, "overrides": [] },
+      "options": { "legend": { "displayMode": "list", "placement": "bottom", "showLegend": true }, "tooltip": { "mode": "multi", "sort": "desc" } },
+      "targets": [ { "refId": "A", "expr": "histogram_quantile(0.95, sum by (le, jvm_gc_name) (rate(jvm_gc_duration_seconds_bucket{job=~\"$job\", pod=~\"$pod\"}[$__rate_interval])))", "legendFormat": "{{jvm_gc_name}}" } ]
+    },
+    {
+      "type": "timeseries",
+      "title": "GC frequency",
+      "datasource": { "type": "prometheus", "uid": "${datasource}" },
+      "gridPos": { "h": 8, "w": 12, "x": 12, "y": 22 },
+      "id": 10,
+      "fieldConfig": { "defaults": { "color": { "mode": "palette-classic" }, "unit": "ops", "custom": { "lineWidth": 2, "fillOpacity": 8, "showPoints": "never", "drawStyle": "line", "spanNulls": true } }, "overrides": [] },
+      "options": { "legend": { "displayMode": "list", "placement": "bottom", "showLegend": true }, "tooltip": { "mode": "multi", "sort": "desc" } },
+      "targets": [ { "refId": "A", "expr": "sum by (jvm_gc_name, jvm_gc_action) (rate(jvm_gc_duration_seconds_count{job=~\"$job\", pod=~\"$pod\"}[$__rate_interval]))", "legendFormat": "{{jvm_gc_name}} / {{jvm_gc_action}}" } ]
+    },
+    {
+      "type": "timeseries",
+      "title": "Time spent in GC (fraction of wall clock)",
+      "datasource": { "type": "prometheus", "uid": "${datasource}" },
+      "gridPos": { "h": 8, "w": 12, "x": 0, "y": 30 },
+      "id": 11,
+      "fieldConfig": { "defaults": { "color": { "mode": "palette-classic" }, "unit": "percentunit", "custom": { "lineWidth": 2, "fillOpacity": 8, "showPoints": "never", "drawStyle": "line", "spanNulls": true } }, "overrides": [] },
+      "options": { "legend": { "displayMode": "list", "placement": "bottom", "showLegend": true }, "tooltip": { "mode": "multi", "sort": "desc" } },
+      "targets": [ { "refId": "A", "expr": "sum by (pod) (rate(jvm_gc_duration_seconds_sum{job=~\"$job\", pod=~\"$pod\"}[$__rate_interval]))", "legendFormat": "{{pod}}" } ]
+    },
+    {
+      "type": "timeseries",
+      "title": "Process CPU utilization",
+      "datasource": { "type": "prometheus", "uid": "${datasource}" },
+      "gridPos": { "h": 8, "w": 12, "x": 12, "y": 30 },
+      "id": 12,
+      "fieldConfig": { "defaults": { "color": { "mode": "palette-classic" }, "unit": "percentunit", "max": 1, "custom": { "lineWidth": 2, "fillOpacity": 8, "showPoints": "never", "drawStyle": "line", "spanNulls": true } }, "overrides": [] },
+      "options": { "legend": { "displayMode": "list", "placement": "bottom", "showLegend": true }, "tooltip": { "mode": "multi", "sort": "desc" } },
+      "targets": [ { "refId": "A", "expr": "jvm_cpu_recent_utilization_ratio{job=~\"$job\", pod=~\"$pod\"}", "legendFormat": "{{pod}}" } ]
+    },
+    {
+      "type": "row",
+      "title": "Threads & classes",
+      "gridPos": { "h": 1, "w": 24, "x": 0, "y": 38 },
+      "id": 102,
+      "collapsed": false,
+      "panels": []
+    },
+    {
+      "type": "timeseries",
+      "title": "Threads by state",
+      "datasource": { "type": "prometheus", "uid": "${datasource}" },
+      "gridPos": { "h": 8, "w": 8, "x": 0, "y": 39 },
+      "id": 13,
+      "fieldConfig": { "defaults": { "color": { "mode": "palette-classic" }, "unit": "short", "custom": { "lineWidth": 2, "fillOpacity": 8, "showPoints": "never", "drawStyle": "line", "spanNulls": true } }, "overrides": [] },
+      "options": { "legend": { "displayMode": "list", "placement": "bottom", "showLegend": true }, "tooltip": { "mode": "multi", "sort": "desc" } },
+      "targets": [ { "refId": "A", "expr": "sum by (jvm_thread_state) (jvm_thread_count{job=~\"$job\", pod=~\"$pod\"})", "legendFormat": "{{jvm_thread_state}}" } ]
+    },
+    {
+      "type": "timeseries",
+      "title": "Threads by pod",
+      "datasource": { "type": "prometheus", "uid": "${datasource}" },
+      "gridPos": { "h": 8, "w": 8, "x": 8, "y": 39 },
+      "id": 14,
+      "fieldConfig": { "defaults": { "color": { "mode": "palette-classic" }, "unit": "short", "custom": { "lineWidth": 2, "fillOpacity": 8, "showPoints": "never", "drawStyle": "line", "spanNulls": true } }, "overrides": [] },
+      "options": { "legend": { "displayMode": "list", "placement": "bottom", "showLegend": true }, "tooltip": { "mode": "multi", "sort": "desc" } },
+      "targets": [ { "refId": "A", "expr": "sum by (pod) (jvm_thread_count{job=~\"$job\", pod=~\"$pod\"})", "legendFormat": "{{pod}}" } ]
+    },
+    {
+      "type": "timeseries",
+      "title": "Loaded classes",
+      "datasource": { "type": "prometheus", "uid": "${datasource}" },
+      "gridPos": { "h": 8, "w": 8, "x": 16, "y": 39 },
+      "id": 15,
+      "fieldConfig": { "defaults": { "color": { "mode": "palette-classic" }, "unit": "short", "custom": { "lineWidth": 2, "fillOpacity": 8, "showPoints": "never", "drawStyle": "line", "spanNulls": true } }, "overrides": [] },
+      "options": { "legend": { "displayMode": "list", "placement": "bottom", "showLegend": true }, "tooltip": { "mode": "multi", "sort": "desc" } },
+      "targets": [ { "refId": "A", "expr": "jvm_class_count{job=~\"$job\", pod=~\"$pod\"}", "legendFormat": "{{pod}}" } ]
+    }
+  ],
+  "refresh": "30s",
+  "schemaVersion": 39,
+  "tags": ["otel", "jvm", "onprem"],
+  "templating": {
+    "list": [
+      {
+        "current": {},
+        "hide": 0,
+        "includeAll": false,
+        "label": "Datasource",
+        "multi": false,
+        "name": "datasource",
+        "options": [],
+        "query": "prometheus",
+        "refresh": 1,
+        "regex": "",
+        "skipUrlSync": false,
+        "type": "datasource"
+      },
+      {
+        "allValue": ".*",
+        "current": {},
+        "datasource": { "type": "prometheus", "uid": "${datasource}" },
+        "definition": "label_values(jvm_memory_used_bytes, job)",
+        "hide": 0,
+        "includeAll": true,
+        "label": "Service (job)",
+        "multi": true,
+        "name": "job",
+        "options": [],
+        "query": { "query": "label_values(jvm_memory_used_bytes, job)", "refId": "StandardVariableQuery" },
+        "refresh": 2,
+        "regex": "",
+        "skipUrlSync": false,
+        "sort": 1,
+        "type": "query"
+      },
+      {
+        "allValue": ".*",
+        "current": {},
+        "datasource": { "type": "prometheus", "uid": "${datasource}" },
+        "definition": "label_values(jvm_memory_used_bytes{job=~\"$job\"}, pod)",
+        "hide": 0,
+        "includeAll": true,
+        "label": "Pod",
+        "multi": true,
+        "name": "pod",
+        "options": [],
+        "query": { "query": "label_values(jvm_memory_used_bytes{job=~\"$job\"}, pod)", "refId": "StandardVariableQuery" },
+        "refresh": 2,
+        "regex": "",
+        "skipUrlSync": false,
+        "sort": 1,
+        "type": "query"
+      }
+    ]
+  },
+  "time": { "from": "now-6h", "to": "now" },
+  "timepicker": {},
+  "timezone": "browser",
+  "title": "JVM Runtime (OpenTelemetry)",
+  "uid": "otel-jvm-runtime",
+  "version": 1,
+  "weekStart": ""
+}

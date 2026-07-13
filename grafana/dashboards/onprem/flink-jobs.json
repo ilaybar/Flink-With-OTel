@@ -1,0 +1,269 @@
+{
+  "annotations": { "list": [] },
+  "description": "Flink framework metrics (checkpoints, throughput, backpressure) exported via Flink's PrometheusReporter (flink-metrics-prometheus). JVM health of JM/TM processes lives in the 'JVM Runtime (OpenTelemetry)' dashboard. Variables: job = Prometheus scrape job, flink_job = Flink job name (job_name label), task = task name.",
+  "editable": true,
+  "fiscalYearStartMonth": 0,
+  "graphTooltip": 1,
+  "id": null,
+  "links": [],
+  "panels": [
+    {
+      "type": "stat",
+      "title": "Job uptime",
+      "datasource": { "type": "prometheus", "uid": "${datasource}" },
+      "gridPos": { "h": 4, "w": 6, "x": 0, "y": 0 },
+      "id": 1,
+      "fieldConfig": { "defaults": { "color": { "mode": "fixed", "fixedColor": "green" }, "unit": "dtdurationms" }, "overrides": [] },
+      "options": { "reduceOptions": { "calcs": ["lastNotNull"] }, "colorMode": "value", "graphMode": "none", "textMode": "value_and_name" },
+      "targets": [ { "refId": "A", "expr": "flink_jobmanager_job_uptime{job=~\"$job\", job_name=~\"$flink_job\"}", "legendFormat": "{{job_name}}" } ]
+    },
+    {
+      "type": "stat",
+      "title": "Restarts",
+      "datasource": { "type": "prometheus", "uid": "${datasource}" },
+      "gridPos": { "h": 4, "w": 6, "x": 6, "y": 0 },
+      "id": 2,
+      "fieldConfig": { "defaults": { "color": { "mode": "thresholds" }, "unit": "short", "thresholds": { "mode": "absolute", "steps": [ { "color": "green", "value": null }, { "color": "orange", "value": 1 }, { "color": "red", "value": 3 } ] } }, "overrides": [] },
+      "options": { "reduceOptions": { "calcs": ["lastNotNull"] }, "colorMode": "value", "graphMode": "none", "textMode": "value_and_name" },
+      "targets": [ { "refId": "A", "expr": "flink_jobmanager_job_numRestarts{job=~\"$job\", job_name=~\"$flink_job\"}", "legendFormat": "{{job_name}}" } ]
+    },
+    {
+      "type": "stat",
+      "title": "Registered TaskManagers",
+      "datasource": { "type": "prometheus", "uid": "${datasource}" },
+      "gridPos": { "h": 4, "w": 6, "x": 12, "y": 0 },
+      "id": 3,
+      "fieldConfig": { "defaults": { "color": { "mode": "fixed", "fixedColor": "blue" }, "unit": "short" }, "overrides": [] },
+      "options": { "reduceOptions": { "calcs": ["lastNotNull"] }, "colorMode": "value", "graphMode": "none" },
+      "targets": [ { "refId": "A", "expr": "flink_jobmanager_numRegisteredTaskManagers{job=~\"$job\"}", "legendFormat": "taskmanagers" } ]
+    },
+    {
+      "type": "stat",
+      "title": "Failed checkpoints",
+      "datasource": { "type": "prometheus", "uid": "${datasource}" },
+      "gridPos": { "h": 4, "w": 6, "x": 18, "y": 0 },
+      "id": 4,
+      "fieldConfig": { "defaults": { "color": { "mode": "thresholds" }, "unit": "short", "thresholds": { "mode": "absolute", "steps": [ { "color": "green", "value": null }, { "color": "red", "value": 1 } ] } }, "overrides": [] },
+      "options": { "reduceOptions": { "calcs": ["lastNotNull"] }, "colorMode": "value", "graphMode": "none", "textMode": "value_and_name" },
+      "targets": [ { "refId": "A", "expr": "flink_jobmanager_job_numberOfFailedCheckpoints{job=~\"$job\", job_name=~\"$flink_job\"}", "legendFormat": "{{job_name}}" } ]
+    },
+    {
+      "type": "row",
+      "title": "Checkpointing",
+      "gridPos": { "h": 1, "w": 24, "x": 0, "y": 4 },
+      "id": 100,
+      "collapsed": false,
+      "panels": []
+    },
+    {
+      "type": "timeseries",
+      "title": "Last checkpoint duration",
+      "datasource": { "type": "prometheus", "uid": "${datasource}" },
+      "gridPos": { "h": 8, "w": 12, "x": 0, "y": 5 },
+      "id": 5,
+      "fieldConfig": { "defaults": { "color": { "mode": "palette-classic" }, "unit": "ms", "custom": { "lineWidth": 2, "fillOpacity": 8, "showPoints": "never", "drawStyle": "line", "spanNulls": true } }, "overrides": [] },
+      "options": { "legend": { "displayMode": "list", "placement": "bottom", "showLegend": true }, "tooltip": { "mode": "multi", "sort": "desc" } },
+      "targets": [ { "refId": "A", "expr": "flink_jobmanager_job_lastCheckpointDuration{job=~\"$job\", job_name=~\"$flink_job\"}", "legendFormat": "{{job_name}}" } ]
+    },
+    {
+      "type": "timeseries",
+      "title": "Last checkpoint size",
+      "datasource": { "type": "prometheus", "uid": "${datasource}" },
+      "gridPos": { "h": 8, "w": 12, "x": 12, "y": 5 },
+      "id": 6,
+      "fieldConfig": { "defaults": { "color": { "mode": "palette-classic" }, "unit": "bytes", "custom": { "lineWidth": 2, "fillOpacity": 8, "showPoints": "never", "drawStyle": "line", "spanNulls": true } }, "overrides": [] },
+      "options": { "legend": { "displayMode": "list", "placement": "bottom", "showLegend": true }, "tooltip": { "mode": "multi", "sort": "desc" } },
+      "targets": [ { "refId": "A", "expr": "flink_jobmanager_job_lastCheckpointSize{job=~\"$job\", job_name=~\"$flink_job\"}", "legendFormat": "{{job_name}}" } ]
+    },
+    {
+      "type": "timeseries",
+      "title": "Checkpoint counts (completed / failed / in progress)",
+      "datasource": { "type": "prometheus", "uid": "${datasource}" },
+      "gridPos": { "h": 8, "w": 24, "x": 0, "y": 13 },
+      "id": 7,
+      "fieldConfig": {
+        "defaults": { "color": { "mode": "palette-classic" }, "unit": "short", "custom": { "lineWidth": 2, "fillOpacity": 8, "showPoints": "never", "drawStyle": "line", "spanNulls": true } },
+        "overrides": [
+          { "matcher": { "id": "byRegexp", "options": "failed.*" }, "properties": [ { "id": "color", "value": { "mode": "fixed", "fixedColor": "red" } } ] },
+          { "matcher": { "id": "byRegexp", "options": "completed.*" }, "properties": [ { "id": "color", "value": { "mode": "fixed", "fixedColor": "green" } } ] }
+        ]
+      },
+      "options": { "legend": { "displayMode": "list", "placement": "bottom", "showLegend": true }, "tooltip": { "mode": "multi", "sort": "desc" } },
+      "targets": [
+        { "refId": "A", "expr": "flink_jobmanager_job_numberOfCompletedCheckpoints{job=~\"$job\", job_name=~\"$flink_job\"}", "legendFormat": "completed {{job_name}}" },
+        { "refId": "B", "expr": "flink_jobmanager_job_numberOfFailedCheckpoints{job=~\"$job\", job_name=~\"$flink_job\"}", "legendFormat": "failed {{job_name}}" },
+        { "refId": "C", "expr": "flink_jobmanager_job_numberOfInProgressCheckpoints{job=~\"$job\", job_name=~\"$flink_job\"}", "legendFormat": "in progress {{job_name}}" }
+      ]
+    },
+    {
+      "type": "row",
+      "title": "Throughput",
+      "gridPos": { "h": 1, "w": 24, "x": 0, "y": 21 },
+      "id": 101,
+      "collapsed": false,
+      "panels": []
+    },
+    {
+      "type": "timeseries",
+      "title": "Records in /s (by task)",
+      "datasource": { "type": "prometheus", "uid": "${datasource}" },
+      "gridPos": { "h": 8, "w": 12, "x": 0, "y": 22 },
+      "id": 8,
+      "fieldConfig": { "defaults": { "color": { "mode": "palette-classic" }, "unit": "ops", "custom": { "lineWidth": 2, "fillOpacity": 8, "showPoints": "never", "drawStyle": "line", "spanNulls": true } }, "overrides": [] },
+      "options": { "legend": { "displayMode": "list", "placement": "bottom", "showLegend": true }, "tooltip": { "mode": "multi", "sort": "desc" } },
+      "targets": [ { "refId": "A", "expr": "sum by (task_name) (flink_taskmanager_job_task_numRecordsInPerSecond{job=~\"$job\", job_name=~\"$flink_job\", task_name=~\"$task\"})", "legendFormat": "{{task_name}}" } ]
+    },
+    {
+      "type": "timeseries",
+      "title": "Records out /s (by task)",
+      "datasource": { "type": "prometheus", "uid": "${datasource}" },
+      "gridPos": { "h": 8, "w": 12, "x": 12, "y": 22 },
+      "id": 9,
+      "fieldConfig": { "defaults": { "color": { "mode": "palette-classic" }, "unit": "ops", "custom": { "lineWidth": 2, "fillOpacity": 8, "showPoints": "never", "drawStyle": "line", "spanNulls": true } }, "overrides": [] },
+      "options": { "legend": { "displayMode": "list", "placement": "bottom", "showLegend": true }, "tooltip": { "mode": "multi", "sort": "desc" } },
+      "targets": [ { "refId": "A", "expr": "sum by (task_name) (flink_taskmanager_job_task_numRecordsOutPerSecond{job=~\"$job\", job_name=~\"$flink_job\", task_name=~\"$task\"})", "legendFormat": "{{task_name}}" } ]
+    },
+    {
+      "type": "row",
+      "title": "Utilization & backpressure",
+      "gridPos": { "h": 1, "w": 24, "x": 0, "y": 30 },
+      "id": 102,
+      "collapsed": false,
+      "panels": []
+    },
+    {
+      "type": "timeseries",
+      "title": "Busy time (ms per second, by task)",
+      "datasource": { "type": "prometheus", "uid": "${datasource}" },
+      "gridPos": { "h": 8, "w": 8, "x": 0, "y": 31 },
+      "id": 10,
+      "fieldConfig": { "defaults": { "color": { "mode": "palette-classic" }, "unit": "ms", "max": 1000, "custom": { "lineWidth": 2, "fillOpacity": 8, "showPoints": "never", "drawStyle": "line", "spanNulls": true } }, "overrides": [] },
+      "options": { "legend": { "displayMode": "list", "placement": "bottom", "showLegend": true }, "tooltip": { "mode": "multi", "sort": "desc" } },
+      "targets": [ { "refId": "A", "expr": "avg by (task_name) (flink_taskmanager_job_task_busyTimeMsPerSecond{job=~\"$job\", job_name=~\"$flink_job\", task_name=~\"$task\"})", "legendFormat": "{{task_name}}" } ]
+    },
+    {
+      "type": "timeseries",
+      "title": "Backpressured time (ms per second, by task)",
+      "datasource": { "type": "prometheus", "uid": "${datasource}" },
+      "gridPos": { "h": 8, "w": 8, "x": 8, "y": 31 },
+      "id": 11,
+      "fieldConfig": { "defaults": { "color": { "mode": "fixed", "fixedColor": "red" }, "unit": "ms", "max": 1000, "custom": { "lineWidth": 2, "fillOpacity": 8, "showPoints": "never", "drawStyle": "line", "spanNulls": true } }, "overrides": [] },
+      "options": { "legend": { "displayMode": "list", "placement": "bottom", "showLegend": true }, "tooltip": { "mode": "multi", "sort": "desc" } },
+      "targets": [ { "refId": "A", "expr": "avg by (task_name) (flink_taskmanager_job_task_backPressuredTimeMsPerSecond{job=~\"$job\", job_name=~\"$flink_job\", task_name=~\"$task\"})", "legendFormat": "{{task_name}}" } ]
+    },
+    {
+      "type": "timeseries",
+      "title": "Idle time (ms per second, by task)",
+      "datasource": { "type": "prometheus", "uid": "${datasource}" },
+      "gridPos": { "h": 8, "w": 8, "x": 16, "y": 31 },
+      "id": 12,
+      "fieldConfig": { "defaults": { "color": { "mode": "palette-classic" }, "unit": "ms", "max": 1000, "custom": { "lineWidth": 2, "fillOpacity": 8, "showPoints": "never", "drawStyle": "line", "spanNulls": true } }, "overrides": [] },
+      "options": { "legend": { "displayMode": "list", "placement": "bottom", "showLegend": true }, "tooltip": { "mode": "multi", "sort": "desc" } },
+      "targets": [ { "refId": "A", "expr": "avg by (task_name) (flink_taskmanager_job_task_idleTimeMsPerSecond{job=~\"$job\", job_name=~\"$flink_job\", task_name=~\"$task\"})", "legendFormat": "{{task_name}}" } ]
+    },
+    {
+      "type": "timeseries",
+      "title": "Event-time lag (now - output watermark)",
+      "datasource": { "type": "prometheus", "uid": "${datasource}" },
+      "gridPos": { "h": 8, "w": 12, "x": 0, "y": 39 },
+      "id": 13,
+      "description": "Only meaningful for event-time pipelines; series appear once watermarks are positive.",
+      "fieldConfig": { "defaults": { "color": { "mode": "palette-classic" }, "unit": "ms", "custom": { "lineWidth": 2, "fillOpacity": 8, "showPoints": "never", "drawStyle": "line", "spanNulls": true } }, "overrides": [] },
+      "options": { "legend": { "displayMode": "list", "placement": "bottom", "showLegend": true }, "tooltip": { "mode": "multi", "sort": "desc" } },
+      "targets": [ { "refId": "A", "expr": "time() * 1000 - (max by (operator_name) (flink_taskmanager_job_task_operator_currentOutputWatermark{job=~\"$job\", job_name=~\"$flink_job\"}) > 0)", "legendFormat": "{{operator_name}}" } ]
+    },
+    {
+      "type": "timeseries",
+      "title": "Kafka source pending records",
+      "datasource": { "type": "prometheus", "uid": "${datasource}" },
+      "gridPos": { "h": 8, "w": 12, "x": 12, "y": 39 },
+      "id": 14,
+      "description": "Emitted by KafkaSource operators only.",
+      "fieldConfig": { "defaults": { "color": { "mode": "palette-classic" }, "unit": "short", "custom": { "lineWidth": 2, "fillOpacity": 8, "showPoints": "never", "drawStyle": "line", "spanNulls": true } }, "overrides": [] },
+      "options": { "legend": { "displayMode": "list", "placement": "bottom", "showLegend": true }, "tooltip": { "mode": "multi", "sort": "desc" } },
+      "targets": [ { "refId": "A", "expr": "sum by (operator_name) (flink_taskmanager_job_task_operator_pendingRecords{job=~\"$job\", job_name=~\"$flink_job\"})", "legendFormat": "{{operator_name}}" } ]
+    }
+  ],
+  "refresh": "30s",
+  "schemaVersion": 39,
+  "tags": ["otel", "flink", "onprem"],
+  "templating": {
+    "list": [
+      {
+        "current": {},
+        "hide": 0,
+        "includeAll": false,
+        "label": "Datasource",
+        "multi": false,
+        "name": "datasource",
+        "options": [],
+        "query": "prometheus",
+        "refresh": 1,
+        "regex": "",
+        "skipUrlSync": false,
+        "type": "datasource"
+      },
+      {
+        "allValue": ".*",
+        "current": {},
+        "datasource": { "type": "prometheus", "uid": "${datasource}" },
+        "definition": "label_values(flink_jobmanager_job_uptime, job)",
+        "hide": 0,
+        "includeAll": true,
+        "label": "Scrape job",
+        "multi": true,
+        "name": "job",
+        "options": [],
+        "query": { "query": "label_values(flink_jobmanager_job_uptime, job)", "refId": "StandardVariableQuery" },
+        "refresh": 2,
+        "regex": "",
+        "skipUrlSync": false,
+        "sort": 1,
+        "type": "query"
+      },
+      {
+        "allValue": ".*",
+        "current": {},
+        "datasource": { "type": "prometheus", "uid": "${datasource}" },
+        "definition": "label_values(flink_jobmanager_job_uptime{job=~\"$job\"}, job_name)",
+        "hide": 0,
+        "includeAll": true,
+        "label": "Flink job",
+        "multi": true,
+        "name": "flink_job",
+        "options": [],
+        "query": { "query": "label_values(flink_jobmanager_job_uptime{job=~\"$job\"}, job_name)", "refId": "StandardVariableQuery" },
+        "refresh": 2,
+        "regex": "",
+        "skipUrlSync": false,
+        "sort": 1,
+        "type": "query"
+      },
+      {
+        "allValue": ".*",
+        "current": {},
+        "datasource": { "type": "prometheus", "uid": "${datasource}" },
+        "definition": "label_values(flink_taskmanager_job_task_busyTimeMsPerSecond{job=~\"$job\", job_name=~\"$flink_job\"}, task_name)",
+        "hide": 0,
+        "includeAll": true,
+        "label": "Task",
+        "multi": true,
+        "name": "task",
+        "options": [],
+        "query": { "query": "label_values(flink_taskmanager_job_task_busyTimeMsPerSecond{job=~\"$job\", job_name=~\"$flink_job\"}, task_name)", "refId": "StandardVariableQuery" },
+        "refresh": 2,
+        "regex": "",
+        "skipUrlSync": false,
+        "sort": 1,
+        "type": "query"
+      }
+    ]
+  },
+  "time": { "from": "now-6h", "to": "now" },
+  "timepicker": {},
+  "timezone": "browser",
+  "title": "Flink Jobs",
+  "uid": "otel-flink-jobs",
+  "version": 1,
+  "weekStart": ""
+}

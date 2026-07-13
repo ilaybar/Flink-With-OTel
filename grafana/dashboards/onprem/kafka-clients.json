@@ -1,0 +1,305 @@
+{
+  "annotations": { "list": [] },
+  "description": "Kafka producer & consumer client metrics for all JVM services instrumented with the OpenTelemetry Java agent (kafka-clients instrumentation). Variables chain top-down: job -> topic -> client/partition. Note: kafka client metrics have no consumer-group label; 'client' is the Kafka client.id. If a panel is empty, verify exact metric names at <pod>:9464/metrics (exporter versions may append unit suffixes).",
+  "editable": true,
+  "fiscalYearStartMonth": 0,
+  "graphTooltip": 1,
+  "id": null,
+  "links": [],
+  "panels": [
+    {
+      "type": "row",
+      "title": "Producer",
+      "gridPos": { "h": 1, "w": 24, "x": 0, "y": 0 },
+      "id": 100,
+      "collapsed": false,
+      "panels": []
+    },
+    {
+      "type": "timeseries",
+      "title": "Records sent /s (by topic)",
+      "datasource": { "type": "prometheus", "uid": "${datasource}" },
+      "gridPos": { "h": 8, "w": 12, "x": 0, "y": 1 },
+      "id": 1,
+      "fieldConfig": { "defaults": { "color": { "mode": "palette-classic" }, "unit": "ops", "custom": { "lineWidth": 2, "fillOpacity": 8, "showPoints": "never", "drawStyle": "line", "spanNulls": true } }, "overrides": [] },
+      "options": { "legend": { "displayMode": "list", "placement": "bottom", "showLegend": true }, "tooltip": { "mode": "multi", "sort": "desc" } },
+      "targets": [ { "refId": "A", "expr": "sum by (topic) (rate(kafka_producer_record_send_total{job=~\"$job\", client_id=~\"$client\", topic=~\"$topic\"}[$__rate_interval]))", "legendFormat": "{{topic}}" } ]
+    },
+    {
+      "type": "timeseries",
+      "title": "Bytes sent /s (by topic)",
+      "datasource": { "type": "prometheus", "uid": "${datasource}" },
+      "gridPos": { "h": 8, "w": 12, "x": 12, "y": 1 },
+      "id": 2,
+      "fieldConfig": { "defaults": { "color": { "mode": "palette-classic" }, "unit": "Bps", "custom": { "lineWidth": 2, "fillOpacity": 8, "showPoints": "never", "drawStyle": "line", "spanNulls": true } }, "overrides": [] },
+      "options": { "legend": { "displayMode": "list", "placement": "bottom", "showLegend": true }, "tooltip": { "mode": "multi", "sort": "desc" } },
+      "targets": [ { "refId": "A", "expr": "sum by (topic) (rate(kafka_producer_byte_total{job=~\"$job\", client_id=~\"$client\", topic=~\"$topic\"}[$__rate_interval]))", "legendFormat": "{{topic}}" } ]
+    },
+    {
+      "type": "timeseries",
+      "title": "Record errors & retries /s (by topic)",
+      "datasource": { "type": "prometheus", "uid": "${datasource}" },
+      "gridPos": { "h": 8, "w": 12, "x": 0, "y": 9 },
+      "id": 3,
+      "fieldConfig": {
+        "defaults": { "color": { "mode": "palette-classic" }, "unit": "ops", "custom": { "lineWidth": 2, "fillOpacity": 8, "showPoints": "never", "drawStyle": "line", "spanNulls": true } },
+        "overrides": [
+          { "matcher": { "id": "byRegexp", "options": "errors.*" }, "properties": [ { "id": "color", "value": { "mode": "fixed", "fixedColor": "red" } } ] },
+          { "matcher": { "id": "byRegexp", "options": "retries.*" }, "properties": [ { "id": "color", "value": { "mode": "fixed", "fixedColor": "orange" } } ] }
+        ]
+      },
+      "options": { "legend": { "displayMode": "list", "placement": "bottom", "showLegend": true }, "tooltip": { "mode": "multi", "sort": "desc" } },
+      "targets": [
+        { "refId": "A", "expr": "sum by (topic) (rate(kafka_producer_record_error_total{job=~\"$job\", client_id=~\"$client\", topic=~\"$topic\"}[$__rate_interval]))", "legendFormat": "errors {{topic}}" },
+        { "refId": "B", "expr": "sum by (topic) (rate(kafka_producer_record_retry_total{job=~\"$job\", client_id=~\"$client\", topic=~\"$topic\"}[$__rate_interval]))", "legendFormat": "retries {{topic}}" }
+      ]
+    },
+    {
+      "type": "timeseries",
+      "title": "Producer request latency avg (per broker node)",
+      "datasource": { "type": "prometheus", "uid": "${datasource}" },
+      "gridPos": { "h": 8, "w": 12, "x": 12, "y": 9 },
+      "id": 4,
+      "fieldConfig": { "defaults": { "color": { "mode": "palette-classic" }, "unit": "ms", "custom": { "lineWidth": 2, "fillOpacity": 8, "showPoints": "never", "drawStyle": "line", "spanNulls": true } }, "overrides": [] },
+      "options": { "legend": { "displayMode": "list", "placement": "bottom", "showLegend": true }, "tooltip": { "mode": "multi", "sort": "desc" } },
+      "targets": [ { "refId": "A", "expr": "kafka_producer_request_latency_avg{job=~\"$job\", client_id=~\"$client\"}", "legendFormat": "{{client_id}} node {{node_id}}" } ]
+    },
+    {
+      "type": "timeseries",
+      "title": "Requests in flight",
+      "datasource": { "type": "prometheus", "uid": "${datasource}" },
+      "gridPos": { "h": 8, "w": 8, "x": 0, "y": 17 },
+      "id": 5,
+      "fieldConfig": { "defaults": { "color": { "mode": "palette-classic" }, "unit": "short", "custom": { "lineWidth": 2, "fillOpacity": 8, "showPoints": "never", "drawStyle": "line", "spanNulls": true } }, "overrides": [] },
+      "options": { "legend": { "displayMode": "list", "placement": "bottom", "showLegend": true }, "tooltip": { "mode": "multi", "sort": "desc" } },
+      "targets": [ { "refId": "A", "expr": "kafka_producer_requests_in_flight{job=~\"$job\", client_id=~\"$client\"}", "legendFormat": "{{client_id}}" } ]
+    },
+    {
+      "type": "timeseries",
+      "title": "Batch size avg",
+      "datasource": { "type": "prometheus", "uid": "${datasource}" },
+      "gridPos": { "h": 8, "w": 8, "x": 8, "y": 17 },
+      "id": 6,
+      "fieldConfig": { "defaults": { "color": { "mode": "palette-classic" }, "unit": "bytes", "custom": { "lineWidth": 2, "fillOpacity": 8, "showPoints": "never", "drawStyle": "line", "spanNulls": true } }, "overrides": [] },
+      "options": { "legend": { "displayMode": "list", "placement": "bottom", "showLegend": true }, "tooltip": { "mode": "multi", "sort": "desc" } },
+      "targets": [ { "refId": "A", "expr": "kafka_producer_batch_size_avg{job=~\"$job\", client_id=~\"$client\"}", "legendFormat": "{{client_id}}" } ]
+    },
+    {
+      "type": "timeseries",
+      "title": "Producer buffer available",
+      "datasource": { "type": "prometheus", "uid": "${datasource}" },
+      "gridPos": { "h": 8, "w": 8, "x": 16, "y": 17 },
+      "id": 7,
+      "fieldConfig": { "defaults": { "color": { "mode": "palette-classic" }, "unit": "bytes", "custom": { "lineWidth": 2, "fillOpacity": 8, "showPoints": "never", "drawStyle": "line", "spanNulls": true } }, "overrides": [] },
+      "options": { "legend": { "displayMode": "list", "placement": "bottom", "showLegend": true }, "tooltip": { "mode": "multi", "sort": "desc" } },
+      "targets": [ { "refId": "A", "expr": "kafka_producer_buffer_available_bytes{job=~\"$job\", client_id=~\"$client\"}", "legendFormat": "{{client_id}}" } ]
+    },
+    {
+      "type": "row",
+      "title": "Consumer",
+      "gridPos": { "h": 1, "w": 24, "x": 0, "y": 25 },
+      "id": 101,
+      "collapsed": false,
+      "panels": []
+    },
+    {
+      "type": "timeseries",
+      "title": "Records consumed /s (by topic)",
+      "datasource": { "type": "prometheus", "uid": "${datasource}" },
+      "gridPos": { "h": 8, "w": 12, "x": 0, "y": 26 },
+      "id": 8,
+      "fieldConfig": { "defaults": { "color": { "mode": "palette-classic" }, "unit": "ops", "custom": { "lineWidth": 2, "fillOpacity": 8, "showPoints": "never", "drawStyle": "line", "spanNulls": true } }, "overrides": [] },
+      "options": { "legend": { "displayMode": "list", "placement": "bottom", "showLegend": true }, "tooltip": { "mode": "multi", "sort": "desc" } },
+      "targets": [ { "refId": "A", "expr": "sum by (topic) (rate(kafka_consumer_records_consumed_total{job=~\"$job\", client_id=~\"$client\", topic=~\"$topic\"}[$__rate_interval]))", "legendFormat": "{{topic}}" } ]
+    },
+    {
+      "type": "timeseries",
+      "title": "Bytes consumed /s (by topic)",
+      "datasource": { "type": "prometheus", "uid": "${datasource}" },
+      "gridPos": { "h": 8, "w": 12, "x": 12, "y": 26 },
+      "id": 9,
+      "fieldConfig": { "defaults": { "color": { "mode": "palette-classic" }, "unit": "Bps", "custom": { "lineWidth": 2, "fillOpacity": 8, "showPoints": "never", "drawStyle": "line", "spanNulls": true } }, "overrides": [] },
+      "options": { "legend": { "displayMode": "list", "placement": "bottom", "showLegend": true }, "tooltip": { "mode": "multi", "sort": "desc" } },
+      "targets": [ { "refId": "A", "expr": "sum by (topic) (rate(kafka_consumer_bytes_consumed_total{job=~\"$job\", client_id=~\"$client\", topic=~\"$topic\"}[$__rate_interval]))", "legendFormat": "{{topic}}" } ]
+    },
+    {
+      "type": "timeseries",
+      "title": "Consumer lag (records, by topic/partition)",
+      "datasource": { "type": "prometheus", "uid": "${datasource}" },
+      "gridPos": { "h": 8, "w": 12, "x": 0, "y": 34 },
+      "id": 10,
+      "fieldConfig": { "defaults": { "color": { "mode": "palette-classic" }, "unit": "short", "custom": { "lineWidth": 2, "fillOpacity": 8, "showPoints": "never", "drawStyle": "line", "spanNulls": true } }, "overrides": [] },
+      "options": { "legend": { "displayMode": "list", "placement": "bottom", "showLegend": true }, "tooltip": { "mode": "multi", "sort": "desc" } },
+      "targets": [ { "refId": "A", "expr": "kafka_consumer_records_lag{job=~\"$job\", client_id=~\"$client\", topic=~\"$topic\", partition=~\"$partition\"}", "legendFormat": "{{topic}}-{{partition}} ({{client_id}})" } ]
+    },
+    {
+      "type": "timeseries",
+      "title": "Consumer lag max",
+      "datasource": { "type": "prometheus", "uid": "${datasource}" },
+      "gridPos": { "h": 8, "w": 12, "x": 12, "y": 34 },
+      "id": 11,
+      "fieldConfig": { "defaults": { "color": { "mode": "palette-classic" }, "unit": "short", "custom": { "lineWidth": 2, "fillOpacity": 8, "showPoints": "never", "drawStyle": "line", "spanNulls": true } }, "overrides": [] },
+      "options": { "legend": { "displayMode": "list", "placement": "bottom", "showLegend": true }, "tooltip": { "mode": "multi", "sort": "desc" } },
+      "targets": [ { "refId": "A", "expr": "kafka_consumer_records_lag_max{job=~\"$job\", client_id=~\"$client\", topic=~\"$topic\", partition=~\"$partition\"}", "legendFormat": "{{topic}}-{{partition}} ({{client_id}})" } ]
+    },
+    {
+      "type": "timeseries",
+      "title": "Fetch latency",
+      "datasource": { "type": "prometheus", "uid": "${datasource}" },
+      "gridPos": { "h": 8, "w": 12, "x": 0, "y": 42 },
+      "id": 12,
+      "fieldConfig": { "defaults": { "color": { "mode": "palette-classic" }, "unit": "ms", "custom": { "lineWidth": 2, "fillOpacity": 8, "showPoints": "never", "drawStyle": "line", "spanNulls": true } }, "overrides": [] },
+      "options": { "legend": { "displayMode": "list", "placement": "bottom", "showLegend": true }, "tooltip": { "mode": "multi", "sort": "desc" } },
+      "targets": [
+        { "refId": "A", "expr": "kafka_consumer_fetch_latency_avg{job=~\"$job\", client_id=~\"$client\"}", "legendFormat": "avg {{client_id}}" },
+        { "refId": "B", "expr": "kafka_consumer_fetch_latency_max{job=~\"$job\", client_id=~\"$client\"}", "legendFormat": "max {{client_id}}" }
+      ]
+    },
+    {
+      "type": "timeseries",
+      "title": "Commit latency avg",
+      "datasource": { "type": "prometheus", "uid": "${datasource}" },
+      "gridPos": { "h": 8, "w": 12, "x": 12, "y": 42 },
+      "id": 13,
+      "fieldConfig": { "defaults": { "color": { "mode": "palette-classic" }, "unit": "ms", "custom": { "lineWidth": 2, "fillOpacity": 8, "showPoints": "never", "drawStyle": "line", "spanNulls": true } }, "overrides": [] },
+      "options": { "legend": { "displayMode": "list", "placement": "bottom", "showLegend": true }, "tooltip": { "mode": "multi", "sort": "desc" } },
+      "targets": [ { "refId": "A", "expr": "kafka_consumer_commit_latency_avg{job=~\"$job\", client_id=~\"$client\"}", "legendFormat": "{{client_id}}" } ]
+    },
+    {
+      "type": "timeseries",
+      "title": "Rebalances per hour",
+      "datasource": { "type": "prometheus", "uid": "${datasource}" },
+      "gridPos": { "h": 8, "w": 12, "x": 0, "y": 50 },
+      "id": 14,
+      "fieldConfig": {
+        "defaults": { "color": { "mode": "palette-classic" }, "unit": "short", "custom": { "lineWidth": 2, "fillOpacity": 8, "showPoints": "never", "drawStyle": "line", "spanNulls": true } },
+        "overrides": [
+          { "matcher": { "id": "byRegexp", "options": "failed.*" }, "properties": [ { "id": "color", "value": { "mode": "fixed", "fixedColor": "red" } } ] }
+        ]
+      },
+      "options": { "legend": { "displayMode": "list", "placement": "bottom", "showLegend": true }, "tooltip": { "mode": "multi", "sort": "desc" } },
+      "targets": [
+        { "refId": "A", "expr": "kafka_consumer_rebalance_rate_per_hour{job=~\"$job\", client_id=~\"$client\"}", "legendFormat": "rebalances {{client_id}}" },
+        { "refId": "B", "expr": "kafka_consumer_failed_rebalance_rate_per_hour{job=~\"$job\", client_id=~\"$client\"}", "legendFormat": "failed {{client_id}}" }
+      ]
+    },
+    {
+      "type": "timeseries",
+      "title": "Assigned partitions & poll staleness",
+      "datasource": { "type": "prometheus", "uid": "${datasource}" },
+      "gridPos": { "h": 8, "w": 12, "x": 12, "y": 50 },
+      "id": 15,
+      "fieldConfig": {
+        "defaults": { "color": { "mode": "palette-classic" }, "unit": "short", "custom": { "lineWidth": 2, "fillOpacity": 8, "showPoints": "never", "drawStyle": "line", "spanNulls": true } },
+        "overrides": [
+          { "matcher": { "id": "byRegexp", "options": "last poll.*" }, "properties": [ { "id": "unit", "value": "s" }, { "id": "color", "value": { "mode": "fixed", "fixedColor": "orange" } } ] }
+        ]
+      },
+      "options": { "legend": { "displayMode": "list", "placement": "bottom", "showLegend": true }, "tooltip": { "mode": "multi", "sort": "desc" } },
+      "targets": [
+        { "refId": "A", "expr": "kafka_consumer_assigned_partitions{job=~\"$job\", client_id=~\"$client\"}", "legendFormat": "partitions {{client_id}}" },
+        { "refId": "B", "expr": "kafka_consumer_last_poll_seconds_ago{job=~\"$job\", client_id=~\"$client\"}", "legendFormat": "last poll {{client_id}}" }
+      ]
+    }
+  ],
+  "refresh": "30s",
+  "schemaVersion": 39,
+  "tags": ["otel", "kafka", "onprem"],
+  "templating": {
+    "list": [
+      {
+        "current": {},
+        "hide": 0,
+        "includeAll": false,
+        "label": "Datasource",
+        "multi": false,
+        "name": "datasource",
+        "options": [],
+        "query": "prometheus",
+        "refresh": 1,
+        "regex": "",
+        "skipUrlSync": false,
+        "type": "datasource"
+      },
+      {
+        "allValue": ".*",
+        "current": {},
+        "datasource": { "type": "prometheus", "uid": "${datasource}" },
+        "definition": "label_values({__name__=~\"kafka_(producer|consumer)_connection_count\"}, job)",
+        "hide": 0,
+        "includeAll": true,
+        "label": "Service (job)",
+        "multi": true,
+        "name": "job",
+        "options": [],
+        "query": { "query": "label_values({__name__=~\"kafka_(producer|consumer)_connection_count\"}, job)", "refId": "StandardVariableQuery" },
+        "refresh": 2,
+        "regex": "",
+        "skipUrlSync": false,
+        "sort": 1,
+        "type": "query"
+      },
+      {
+        "allValue": ".*",
+        "current": {},
+        "datasource": { "type": "prometheus", "uid": "${datasource}" },
+        "definition": "label_values({__name__=~\"kafka_(producer_record_send_total|consumer_records_consumed_total)\", job=~\"$job\"}, topic)",
+        "hide": 0,
+        "includeAll": true,
+        "label": "Topic",
+        "multi": true,
+        "name": "topic",
+        "options": [],
+        "query": { "query": "label_values({__name__=~\"kafka_(producer_record_send_total|consumer_records_consumed_total)\", job=~\"$job\"}, topic)", "refId": "StandardVariableQuery" },
+        "refresh": 2,
+        "regex": "",
+        "skipUrlSync": false,
+        "sort": 1,
+        "type": "query"
+      },
+      {
+        "allValue": ".*",
+        "current": {},
+        "datasource": { "type": "prometheus", "uid": "${datasource}" },
+        "definition": "label_values({__name__=~\"kafka_(producer_record_send_total|consumer_records_consumed_total)\", job=~\"$job\", topic=~\"$topic\"}, client_id)",
+        "hide": 0,
+        "includeAll": true,
+        "label": "Client (client.id)",
+        "multi": true,
+        "name": "client",
+        "options": [],
+        "query": { "query": "label_values({__name__=~\"kafka_(producer_record_send_total|consumer_records_consumed_total)\", job=~\"$job\", topic=~\"$topic\"}, client_id)", "refId": "StandardVariableQuery" },
+        "refresh": 2,
+        "regex": "",
+        "skipUrlSync": false,
+        "sort": 1,
+        "type": "query"
+      },
+      {
+        "allValue": ".*",
+        "current": {},
+        "datasource": { "type": "prometheus", "uid": "${datasource}" },
+        "definition": "label_values(kafka_consumer_records_lag{job=~\"$job\", topic=~\"$topic\", client_id=~\"$client\"}, partition)",
+        "hide": 0,
+        "includeAll": true,
+        "label": "Partition",
+        "multi": true,
+        "name": "partition",
+        "options": [],
+        "query": { "query": "label_values(kafka_consumer_records_lag{job=~\"$job\", topic=~\"$topic\", client_id=~\"$client\"}, partition)", "refId": "StandardVariableQuery" },
+        "refresh": 2,
+        "regex": "",
+        "skipUrlSync": false,
+        "sort": 3,
+        "type": "query"
+      }
+    ]
+  },
+  "time": { "from": "now-6h", "to": "now" },
+  "timepicker": {},
+  "timezone": "browser",
+  "title": "Kafka Clients (OpenTelemetry)",
+  "uid": "otel-kafka-clients",
+  "version": 1,
+  "weekStart": ""
+}
